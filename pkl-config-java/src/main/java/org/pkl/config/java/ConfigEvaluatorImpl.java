@@ -1,5 +1,5 @@
 /*
- * Copyright © 2024 Apple Inc. and the Pkl project authors. All rights reserved.
+ * Copyright © 2024-2025 Apple Inc. and the Pkl project authors. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ final class ConfigEvaluatorImpl implements ConfigEvaluator {
   private final ValueMapper mapper;
 
   ConfigEvaluatorImpl(Evaluator evaluator, ValueMapper mapper) {
+    System.setProperty("truffle.UseFallbackRuntime", "true");
+    System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
     this.evaluator = evaluator;
     this.mapper = mapper;
   }
