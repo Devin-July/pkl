@@ -128,6 +128,16 @@ class Http {
   /// Configuration of the HTTP proxy to use.
   proxy: Proxy?
 
+  /// Path to a directory containing CA certificates to trust when making HTTPS requests.
+  ///
+  /// If specified, certificates from this directory will be used instead of the default
+  /// `~/.pkl/cacerts/` directory. Certificates must be X.509 certificates in PEM format.
+  ///
+  /// This setting is checked after the `--ca-certificates` CLI option but before the
+  /// default `~/.pkl/cacerts/` directory.
+  @Since { version = "0.29.0" }
+  cacerts: String?
+
   /// Replace outbound requests from one URL with another URL.
   ///
   /// Each key describes the prefix of a request, and each value describes the replacement prefix.

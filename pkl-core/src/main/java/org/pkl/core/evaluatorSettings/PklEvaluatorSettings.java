@@ -123,8 +123,9 @@ public record PklEvaluatorSettings(
         externalResourceReaders);
   }
 
-  public record Http(@Nullable Proxy proxy, @Nullable Map<URI, URI> rewrites) {
-    public static final Http DEFAULT = new Http(null, Collections.emptyMap());
+  public record Http(
+      @Nullable Proxy proxy, @Nullable Map<URI, URI> rewrites, @Nullable String cacerts) {
+    public static final Http DEFAULT = new Http(null, Collections.emptyMap(), null);
 
     @SuppressWarnings("unchecked")
     public static @Nullable Http parse(@Nullable Value input) {
@@ -133,8 +134,9 @@ public record PklEvaluatorSettings(
       } else if (input instanceof PObject http) {
         var proxy = Proxy.parse((Value) http.getProperty("proxy"));
         var rewrites = http.getProperty("rewrites");
+        var cacerts = (String) http.getProperty("cacerts");
         if (rewrites instanceof PNull) {
-          return new Http(proxy, null);
+          return new Http(proxy, null, cacerts);
         } else {
           var parsedRewrites = new HashMap<URI, URI>();
           for (var entry : ((Map<String, String>) rewrites).entrySet()) {
@@ -146,7 +148,7 @@ public record PklEvaluatorSettings(
               throw new PklException(ErrorMessages.create("invalidUri", e.getInput()));
             }
           }
-          return new Http(proxy, parsedRewrites);
+          return new Http(proxy, parsedRewrites, cacerts);
         }
       } else {
         throw PklBugException.unreachableCode();

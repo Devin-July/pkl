@@ -77,6 +77,7 @@ class PklSettingsTest {
           listOf("example.com", "pkg.pkl-lang.org"),
         ),
         mapOf(URI("https://foo.com/") to URI("https://bar.com/")),
+        null,
       )
     assertThat(settings).isEqualTo(PklSettings(Editor.SYSTEM, expectedHttp))
   }
@@ -101,6 +102,7 @@ class PklSettingsTest {
     val expectedHttp =
       PklEvaluatorSettings.Http(
         PklEvaluatorSettings.Proxy(URI("http://localhost:8080"), listOf()),
+        null,
         null,
       )
     assertThat(settings).isEqualTo(PklSettings(Editor.SYSTEM, expectedHttp))
@@ -156,6 +158,52 @@ class PklSettingsTest {
       .hasMessageContaining(
         "Expected `output.value` of module `${settingsFile.toUri()}` to be of type `pkl.settings`, but got type `settings`."
       )
+  }
+
+  @Test
+  fun `load user settings with http cacerts`(@TempDir tempDir: Path) {
+    val settingsPath = tempDir.resolve("settings.pkl")
+    settingsPath.createParentDirectories()
+    settingsPath.writeString(
+      """
+      amends "pkl:settings"
+      http {
+        cacerts = "/custom/path/to/certs"
+      }
+      """
+        .trimIndent()
+    )
+
+    val settings = PklSettings.loadFromPklHomeDir(tempDir)
+    val expectedHttp = PklEvaluatorSettings.Http(null, null, "/custom/path/to/certs")
+    assertThat(settings).isEqualTo(PklSettings(Editor.SYSTEM, expectedHttp))
+  }
+
+  @Test
+  fun `load user settings with http cacerts and proxy`(@TempDir tempDir: Path) {
+    val settingsPath = tempDir.resolve("settings.pkl")
+    settingsPath.createParentDirectories()
+    settingsPath.writeString(
+      """
+      amends "pkl:settings"
+      http {
+        proxy {
+          address = "http://localhost:8080"
+        }
+        cacerts = "/custom/path/to/certs"
+      }
+      """
+        .trimIndent()
+    )
+
+    val settings = PklSettings.loadFromPklHomeDir(tempDir)
+    val expectedHttp =
+      PklEvaluatorSettings.Http(
+        PklEvaluatorSettings.Proxy(URI("http://localhost:8080"), listOf()),
+        null,
+        "/custom/path/to/certs",
+      )
+    assertThat(settings).isEqualTo(PklSettings(Editor.SYSTEM, expectedHttp))
   }
 
   private fun checkEquals(expected: Editor, actual: PObject) {

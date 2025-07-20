@@ -972,13 +972,13 @@ To learn more about available settings, see link:{uri-pkl-stdlib-docs-settings}[
 == CA Certificates
 
 When making TLS requests, Pkl comes with its own set of {uri-certificates}[CA certificates].
-These certificates can be overridden via either of the two options:
+These certificates can be overridden via any of the following methods, in order of precedence:
 
 - Set them directly via the CLI option `--ca-certificates <path>`.
+- Specify a custom path in the `pkl:settings` module using `http.cacerts`.
 - Add them to a directory at path `~/.pkl/cacerts/`.
 
-Both these options will *replace* the default CA certificates bundled with Pkl. +
-The CLI option takes precedence over the certificates in `~/.pkl/cacerts/`. +
+All these options will *replace* the default CA certificates bundled with Pkl. +
 Certificates need to be X.509 certificates in PEM format.
 
 [[http-proxy]]
