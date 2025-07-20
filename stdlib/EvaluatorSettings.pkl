@@ -128,6 +128,22 @@ class Http {
   /// Configuration of the HTTP proxy to use.
   proxy: Proxy?
 
+  /// The CA certificates to trust for HTTPS connections.
+  ///
+  /// Each path should point to a file containing [X.509](https://en.wikipedia.org/wiki/X.509) certificates in PEM format.
+  ///
+  /// If this list is empty or null, the certificate files in `~/.pkl/cacerts/` are used.
+  /// If `~/.pkl/cacerts/` does not exist or is empty, Pkl's built-in CA certificates are used.
+  ///
+  /// Example:
+  /// ```
+  /// caCertificates {
+  ///   "/etc/ssl/certs/ca-certificates.crt"
+  ///   "/path/to/custom/cert.pem"
+  /// }
+  /// ```
+  caCertificates: Listing<String>?
+
   /// Replace outbound requests from one URL with another URL.
   ///
   /// Each key describes the prefix of a request, and each value describes the replacement prefix.

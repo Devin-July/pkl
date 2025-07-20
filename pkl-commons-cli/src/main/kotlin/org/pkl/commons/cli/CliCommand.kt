@@ -232,11 +232,23 @@ abstract class CliCommand(protected val cliOptions: CliBaseOptions) {
   val httpClient: HttpClient by lazy {
     with(HttpClient.builder()) {
       setTestPort(cliOptions.testPort)
-      if (cliOptions.normalizedCaCertificates.isEmpty()) {
+
+      // Priority: CLI options > project settings > global settings > default
+      val caCertificates =
+        when {
+          cliOptions.normalizedCaCertificates.isNotEmpty() -> cliOptions.normalizedCaCertificates
+          project?.evaluatorSettings?.http?.caCertificates?.isNotEmpty() == true ->
+            project!!.evaluatorSettings!!.http!!.caCertificates!!
+          settings.http?.caCertificates?.isNotEmpty() == true -> settings.http!!.caCertificates!!
+          else -> emptyList()
+        }
+
+      if (caCertificates.isEmpty()) {
         addDefaultCliCertificates()
       } else {
-        for (file in cliOptions.normalizedCaCertificates) addCertificates(file)
+        for (file in caCertificates) addCertificates(file)
       }
+
       if ((proxyAddress ?: noProxy) != null) {
         setProxy(proxyAddress, noProxy ?: listOf())
       }

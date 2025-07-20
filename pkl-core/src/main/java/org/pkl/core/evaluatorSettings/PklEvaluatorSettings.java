@@ -123,8 +123,11 @@ public record PklEvaluatorSettings(
         externalResourceReaders);
   }
 
-  public record Http(@Nullable Proxy proxy, @Nullable Map<URI, URI> rewrites) {
-    public static final Http DEFAULT = new Http(null, Collections.emptyMap());
+  public record Http(
+      @Nullable Proxy proxy,
+      @Nullable List<Path> caCertificates,
+      @Nullable Map<URI, URI> rewrites) {
+    public static final Http DEFAULT = new Http(null, null, Collections.emptyMap());
 
     @SuppressWarnings("unchecked")
     public static @Nullable Http parse(@Nullable Value input) {
@@ -132,9 +135,14 @@ public record PklEvaluatorSettings(
         return null;
       } else if (input instanceof PObject http) {
         var proxy = Proxy.parse((Value) http.getProperty("proxy"));
+
+        var caCertificatesStrs = (List<String>) http.getProperty("caCertificates");
+        var caCertificates =
+            caCertificatesStrs == null ? null : caCertificatesStrs.stream().map(Path::of).toList();
+
         var rewrites = http.getProperty("rewrites");
         if (rewrites instanceof PNull) {
-          return new Http(proxy, null);
+          return new Http(proxy, caCertificates, null);
         } else {
           var parsedRewrites = new HashMap<URI, URI>();
           for (var entry : ((Map<String, String>) rewrites).entrySet()) {
@@ -146,7 +154,7 @@ public record PklEvaluatorSettings(
               throw new PklException(ErrorMessages.create("invalidUri", e.getInput()));
             }
           }
-          return new Http(proxy, parsedRewrites);
+          return new Http(proxy, caCertificates, parsedRewrites);
         }
       } else {
         throw PklBugException.unreachableCode();
